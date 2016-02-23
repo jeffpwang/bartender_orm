@@ -1,6 +1,6 @@
 class Cocktail
     
-    attr_accessor :name, :spirits, :id
+    attr_accessor :name, :spirits, :id, :mixers
   
 
     @@all = []
@@ -8,6 +8,7 @@ class Cocktail
     def initialize(attributes)
         @name = attributes[:name] 
         @spirits = []
+        @mixers = []
         @@all << self
     end 
     
@@ -91,6 +92,13 @@ class Cocktail
         new_spirit
     end 
     
+    def add_mixer(mixer_name)
+        new_mixer = Mixer.create({:name => mixer_name})
+        new_mixer.cocktails << self
+        self.mixers << new_mixer
+        new_mixer
+    end
+    
     def self.drop_table
         sql = <<-SQL
         DROP TABLE IF EXISTS cocktails
@@ -99,7 +107,7 @@ class Cocktail
         DB[:conn].execute(sql)
     end
     
-    def add_to_joiner
+    def add_to_spirit_joiner
         spirit_array = []
         self.spirits.each do |spirit| 
            spirit_array << spirit.id
@@ -109,5 +117,18 @@ class Cocktail
             CocktailSpirit.create({:cocktail_id => self.id, :spirit_id => spirit_id}) 
         end
     end 
+    
+    def add_to_mixer_joiner
+        mixer_array = []
+        self.mixers.each do |mixer| 
+           mixer_array << mixer.id
+        end 
+        
+        mixer_array.each do |mixer_id| 
+            CocktailMixer.create({:cocktail_id => self.id, :mixer_id => mixer_id}) 
+        end
+    end 
+    
+    
     
 end
